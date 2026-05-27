@@ -1,0 +1,333 @@
+Week1 JA Answers
+-----------------
+
+Q1. Why should an automation tester learn JavaScript/TypeScript deeply instead of only Playwright syntax?
+
+Strong Answer:
+
+Better debugging
+Framework development
+Async handling
+Data manipulation
+Writing reusable utilities
+
+--------------------------------------------------------------
+
+Q2. What is the output?
+console.log(typeof null);
+
+Expected:
+
+object
+
+Follow-up:
+Why is it considered a bug?
+
+In the early version of JavaScript, values were stored with type tags internally.
+The binary tag used for objects accidentally matched the tag for null.
+Because of this design mistake, typeof null started returning "object".
+
+Why not fixed?
+
+Many old websites and applications already depend on this behavior.
+Changing it now would break backward compatibility on the web.
+
+--------------------------------------------------------------
+
+Q3. Difference between undefined and null?
+
+Expected:
+
+undefined	null
+Variable declared but no value	Intentional empty value
+
+--------------------------------------------------------------
+
+Q4. What is the output?
+let a;
+console.log(a + 1);
+
+Expected:
+
+NaN
+
+What is NaN in JavaScript?
+
+NaN stands for:
+Not a Number
+It is a special numeric value representing an invalid mathematical operation.
+
+--------------------------------------------------------------
+
+Q5. What is the datatype of NaN?
+console.log(typeof NaN);
+
+Expected:
+
+number
+
+--------------------------------------------------------------
+
+Q6. What is the output?
+console.log(typeof typeof 10);
+
+Expected:
+
+string
+
+--------------------------------------------------------------
+
+Q7. What is the output?
+console.log(typeof []);
+console.log(typeof {});
+
+Expected:
+
+object
+object
+
+Follow-up:
+“How do you check if it is array?”
+
+Expected:
+
+Array.isArray()
+
+--------------------------------------------------------------
+
+Q8. Difference between var, let, and const?
+
+Expected:
+
+var	let	const
+function scoped	block scoped	block scoped
+redeclare allowed	not allowed	not allowed
+reassignment allowed	allowed	not allowed
+
+--------------------------------------------------------------
+
+Q9. What is hoisting?
+
+Expected:
+
+Hoisting os default behaviour of JS by moving the declarations to the top their scope(Global/functional/Block) before the code is executed
+With Hoisting-JS execution has 2 phases
+1.Memory creation phase:
+Here the variables and functiones are allocated with memory.
+2.Execution phase:
+code will run line by line and values are assigned for performing operations.
+
+Types of hoisting
+1) variable hoisting
+2) function hoisting
+
+1. var
+
+var declarations are hoisted and initialized to undefined.
+So, you can access the variable before its declaration (but the value will be undefined until assignment).
+Ex:
+console.log(a); // ✅ undefined (hoisted + initialized)
+var a = 10;
+console.log(a); // 10
+
+2. let
+
+let is hoisted but not initialized.
+Exists in a Temporal Dead Zone (TDZ) from the start of the scope until the line of declaration.
+Accessing it before declaration throws a ReferenceError.
+Ex
+console.log(b); // ❌ ReferenceError (TDZ)
+let b = 20;
+console.log(b); // 20
+
+3. const
+
+Same as let → hoisted but not initialized, also in Temporal Dead Zone.
+The difference: must be initialized at the time of declaration.
+Ex:
+console.log(c); // ❌ ReferenceError (TDZ)
+const c = 30;
+console.log(c); // 30
+
+2) Function declarations are fully hoisted.
+
+This means both the function name and the function body are moved to the top of their scope.
+You can call the function before it is defined.
+
+Sample code: 
+Sayhello()
+function Sayhello(){
+    console.log("Welcome")
+    }
+
+--------------------------------------------------------------
+
+Q10. Can we modify object values declared with const?
+const user = {
+  name: "John"
+};
+
+user.name = "David";
+console.log(user.name);
+
+Expected:
+
+David
+
+Why?
+
+user stores the reference/address of the object.
+const means:
+“this reference cannot point to another object”.
+
+So this is NOT allowed:
+
+const user = { name: "John" };
+
+user = { name: "David" }; // Error
+
+Because you are re-assigning the reference.
+
+But this is allowed:
+
+user.name = "David";
+
+Because you are only changing a property inside the same object.
+
+Simple understanding:
+
+const → reference cannot change
+properties inside object → can change
+
+Same applies for arrays:
+
+const arr = [1,2];
+
+arr.push(3); // allowed
+console.log(arr); // [1,2,3]
+
+arr = [4,5]; // Error
+--------------------------------------------------------------
+
+Q11. Predict the output
+
+var x = 1;
+
+function test() {
+   var x = 2;
+   console.log(x);
+}
+
+test();
+console.log(x);
+
+Output :
+
+2
+
+1
+--------------------------------------------------------------
+
+Q12. Difference between == and === ?, Why should automation testers prefer === ?
+
+Expected:
+
+1. Double Equals (==) – Loose Equality
+
+Compares only values, not types.
+If types differ, JavaScript does type coercion (tries to convert them before comparing).
+
+Ex:
+
+console.log(5 == "5");   // true  (string "5" → number 5)// converts string 5 into number and then compares).
+console.log(0 == false); // true  (false → 0)
+console.log(null == undefined); // true  (special case)
+
+2. Triple Equals (===) – Strict Equality
+
+Compares both value and type.
+No type coercion happens.
+
+Ex:
+
+console.log(5 === "5");   // false (number vs string)
+console.log(0 === false); // false (number vs boolean)
+console.log(null === undefined); // false (different types)
+
+--------------------------------------------------------------
+
+Q13. Why are loops important in automation?
+
+Expected:
+
+Handling multiple elements
+Table validations
+Dropdown validations
+Pagination
+
+--------------------------------------------------------------
+
+Interesting Rapid-Fire / Tricky Questions
+-----------------------------------------
+
+Q1. Output?
+console.log(1 + "1");
+
+Expected:
+
+"11"
+
+
+Q2. Output?
+console.log("5" - 2);
+
+Expected:
+
+3
+
+
+Q4. Output?
+console.log(true + true);
+
+Expected:
+
+2
+
+
+Q5. Output?
+console.log([] == false);
+
+Expected:
+
+true
+
+
+
+-----
+
+
+
+
+Home Assignment for Job Assistance:
+---------------------------------
+
+1.You have a dynamic string: 'Order ID: #12345-Confirmed'. Write a quick logic using String methods (slice, split, or substring) to extract just the ID 12345
+
+
+2."I have a string let str = 'Hello World'. I want to change the 'H' to 'J'.
+If I write str[0] = 'J';, what happens?
+Question: How does JavaScript handle string storage in memory? Since strings are immutable, how do we actually 'modify' them in our code?"
+
+3. When would you use replaceAll() in test Automation?
+
+
+4."Take a sentence: 'Automation testing is incredibly important'.
+Task: Write a loop that finds and returns the longest word in that sentence."
+
+
+5. remove duplicates from a string
+
+
+
+6. Write a program to count vowels in a string "Playwright"
+

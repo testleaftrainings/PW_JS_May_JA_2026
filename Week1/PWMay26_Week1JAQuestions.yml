@@ -1,0 +1,120 @@
+WEEK ! JobAssistance Discussion :
+--------------------------------
+
+Q1. Why should an automation tester learn JavaScript/TypeScript deeply instead of only Playwright syntax?
+
+Q2. What is the output?
+console.log(typeof null);
+
+Q3. Difference between undefined and null?
+
+Q4. What is the output?
+
+let a;
+console.log(a + 1);
+
+
+Q5. What is the datatype of NaN?
+console.log(typeof NaN);
+
+Q6. What is the output?
+console.log(typeof typeof 10);
+
+Q7. What is the output?
+console.log(typeof []); // array
+console.log(typeof {}); // object
+
+Follow-up:
+“How do you check if it is array?”
+
+Q8. Difference between var, let, and const?
+
+Q9. What is hoisting?
+
+
+Q10. Can we modify object values declared with const?
+const user = {
+  name: "John",
+  mob:89789789
+};
+
+user.name = "David";
+console.log(user.name);
+
+
+Q11. Predict the output
+
+var x = 1;
+
+function test() {
+   var x = 2;
+   console.log(x);
+}
+
+test();
+console.log(x);
+
+O/P :
+2
+
+1
+
+
+Q12. Difference between == and === ?, Why should automation testers prefer === ?
+
+console.log(1=="1") // type coercion
+
+Q13. Why are loops important in automation? Where they used in real projects?
+
+--------------------------------------------------------------
+
+Interesting Rapid-Fire / Tricky Questions
+-----------------------------------------
+
+Q1. Output?
+console.log(1 + "1"); // 11
+
+
+Q2. Output?
+console.log("5" - 2); // 
+
+Q4. Output?
+console.log(true + true);
+
+Q5. Output?
+console.log([] == false);
+
+-----
+
+
+
+JS Coding questions :
+---
+
+1.You have a dynamic string: 'Order ID: #12345-Confirmed'. Write a quick logic using String methods (slice, split, or substring) to extract just the ID 12345
+
+--------------------------
+
+2."I have a string let str = 'Hello World'. I want to change the 'H' to 'J'.
+If I write str[0] = 'J';, what happens?
+Question: How does JavaScript handle string storage in memory? Since strings are immutable, how do we actually 'modify' them in our code?"
+
+--------------------------
+
+3. When would you use replaceAll() in test Automation?
+Clue : $1,000.50
+
+------------------------------------------------------------------
+
+
+Home Assignment for Job Assistance:
+---------------------------------
+
+1."Take a sentence: 'Automation testing is incredibly important'.
+Task: Write a loop that finds and returns the longest word in that sentence."
+
+2. remove duplicates from a string 
+let word = "programming";
+
+3. Write a program to count vowels in a string " Playwright"
+
