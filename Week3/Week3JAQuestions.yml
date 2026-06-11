@@ -1,0 +1,63 @@
+
+Week2JAQuestions:
+-----------------------------
+
+1. Stabilizing Locators (Strict Mode Violation)
+
+Problem: page.locator('button') is too generic. If a "Loading Spinner" also uses a <button> tag, Playwright detects two elements and throws a Strict Mode Violation error.
+
+
+
+await page.getByRole("button",{name:"View All Applications",exact:true}).filter({hasText:""})click()
+
+
+
+2. Relative XPath for Dynamic Tables
+
+3. Modal Disappearance & Timeouts
+Problem: Default timeout is 5s, but the process takes 6s.
+
+await page.waitForTimeout(5000); // pausing for no reason
+
+expect(page.locator("#alert")).toBeHidden({timeout:6000}) //assertion specific timeout 
+
+await page.locator("#button").click({5000}) //action timeout
+
+
+4. Broken Link Scraper 
+
+
+
+
+
+5. Compound XPath (AND Logic)
+Logic: Use the and keyword within square brackets to verify multiple attributes on a single element.
+
+6. How do you handle a dropdown that doesn't use the standard <select> tag but is built with a <div> or <ul> (custom dropdown)?**
+
+
+
+7.Your dropdown options load only after you type 3 characters in an input field. How do you automate this?**
+
+ await page.locator("#textBox").pressSequentially("Chennai")
+
+8. How do you select multiple options in a standard <select multiple> element?**
+
+await page.selectOption("#ui-selectonemenu",[{label:"Selenium"},{label:"Playwright"}])
+
+9. Static vs. Web-First URL Assertions
+
+const url = page.url()
+expect(url).toBe("https://leaftaps.com") // static asssertion
+expect(url).toHaveURL("https://leaftaps.com") // retrting assertions // web-first assertions 
+
+10. Nested Frames with Dynamic IDs
+
+Q:
+A legacy banking app uses nested iframes. The inner iframe’s ID is dynamic (e.g., `frame_882`).  
+How do you reliably click a button inside it without using the dynamic ID, and how do you avoid timeout if it loads slowly?
+
+await page.frameLocator("") // retrying mechanism
+
+
+await page.frame("") // non-retry
