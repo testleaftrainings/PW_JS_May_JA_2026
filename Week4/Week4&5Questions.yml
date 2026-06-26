@@ -1,0 +1,84 @@
+Week4 -
+------
+
+
+1. How does datatype `any` differ from `unknown` in TypeScript?
+
+2. What is the significance of optional parameter in typescript?
+
+3.What are the four main OOP principles? Explain how each one can be used in a test automation framework
+
+4.What is Inheritance in OOP?
+
+5.What is a constructor in a class?
+
+6. Difference between: important interview question.
+
+type
+
+and
+
+interface in typescript
+
+7.In an automation framework, why would you make locators or methods private inside a Page Object class?
+
+8.What is the Page Object Model, and why is it considered a best practice in automation frameworks?
+
+9.If two pages share similar functionality such as:
+
+10.If multiple tests depend on the same test data, how would you avoid data conflicts in parallel execution?
+
+11.There are 2 functions in playwright to enter a value in textbox, one is type and another one is fill. When to use what?
+
+
+----------------
+
+Week5 
+------
+
+Q1. Window Handling (Popups & Tabs)
+
+The Question:
+"You click a button that opens a third-party payment gateway in a new tab. How do you capture that tab, and why is using Promise.all essential here instead of just awaiting the click first?"
+The Problem: When you await a click, the code execution pauses until the click action is complete. During that micro-second, the browser might have already opened the new tab. If your waitForEvent('page') starts after that, it misses the "open" event entirely, and your test hangs forever.
+
+Q2. Dialog Handling Timing
+
+Q:
+Will this code correctly handle dialogs?
+
+await page.getByRole('button').click();
+
+page.on('dialog', async dialog => {
+  console.log(dialog.message());
+  await dialog.accept('My Input Text');
+});
+
+
+3. Verify File Download and Check Size
+
+Q:
+A report is downloaded. How do you verify the download succeeded and confirm the file size?
+
+4. Hidden File Upload Input
+
+Q:
+How do you upload a file if the <input type="file"> is hidden via CSS?
+
+5. Retry Logic for Downloads
+
+Q:
+Sometimes downloads fail due to load — how do you implement retry logic without hiding real errors?
+
+6. Assert File Type Before Upload
+
+Q:
+How do you validate the file type before uploading?
+
+7. Assert File Size Before Upload
+
+Q:
+Before uploading, how do you check file size?
+
+8.You want smoke tests to run first with minimal retries, and full regression to run later with retries and videos. How would you split this using Playwright config?
+

@@ -1,0 +1,739 @@
+Week4:
+------
+
+Q1. How does datatype `any` differ from `unknown` in TypeScript?
+
+Ans: these are the dataTypes available in Typescript
+
+1) any
+
+Definition: any allows any type of value.
+TypeScript stops checking type safety for that variable.
+
+let value: any;
+
+value = 10;
+value = "Hello";
+value = true;
+
+console.log(value); // TypeScript allows everything
+
+Pros: Very flexible
+Cons: No type safety → can lead to runtime errors
+
+2) unknown
+
+Definition:unknown also allows any type, but TypeScript forces you to check the type before using it.
+Safer than any.
+
+EX:
+let value: unknown;
+
+value = 10;
+value = "Hello";
+
+// console.log(value.toUpperCase()); //  Error: Object is of type 'unknown'
+
+// Type check needed
+if (typeof value === "string") {
+  console.log(value.toUpperCase()); // Works
+}
+
+Pros: Flexible and type-safe
+Cons: Need to do type checks before using
+
+------------------------------------------------------------------------
+
+Q2. What is the significance of optional parameter in typescript?
+
+In TypeScript, optional parameters allow a function to be called with or without that argument, making the function more flexible and avoiding errors when a value 
+is not provided.
+
+Example: Optional Function Parameter(TS)
+-------------------------------------------
+
+function greet(name?: string) {
+  if (name) {
+    console.log(`Hello, ${name}!`);
+  } else {
+    console.log("Hello, Guest!");
+  }
+}
+
+greet("Ravi"); // Hello, Ravi!
+greet();            // Hello, Guest!
+
+
+The ? after a parameter makes it optional — no error even if you don’t pass that argument.
+Without ?, the argument is required and calling the function without it will throw an error//❌ Error – Argument required.
+
+------------------------------------------------------------------------
+
+3.What are the four main OOP principles? Explain how each one can be used in a test automation framework
+The four core Object-Oriented Programming principles are:
+
+Encapsulation
+
+Inheritance
+
+Polymorphism
+
+Abstraction
+
+How they apply to automation frameworks
+
+Encapsulation
+Encapsulation means bundling data and methods inside a class and restricting direct access.
+
+Example in automation:
+
+Page Object classes store locators and actions together.
+
+class LoginPage {
+  private usernameField
+  private passwordField
+
+  async login(user, pass) { }
+}
+
+Benefit:
+
+Prevents tests from directly accessing locators.
+
+Inheritance
+
+Inheritance allows one class to inherit properties and methods from another class.
+
+Example:
+
+BasePage
+  |
+LoginPage
+DashboardPage
+
+Common methods like:
+
+waitForElement()
+
+click()
+
+navigate()
+
+can exist in BasePage.
+
+Benefit:
+
+Code reuse.
+
+Polymorphism
+
+Polymorphism means the same method name behaving differently depending on context.
+
+Example:
+
+login(user, password)
+login(token)
+
+Same method name → different implementations.
+
+Benefit:
+
+Flexible framework design.
+
+Abstraction
+
+Abstraction hides implementation complexity and exposes only necessary functionality.
+
+Example:
+
+Instead of writing this in tests:
+
+page.locator("#login").click()
+
+Tests call:
+
+loginPage.login()
+
+Benefit:
+
+Cleaner test scripts.
+
+------------------------------------------------------------------------
+
+4.What is Inheritance in OOP?
+How would you use inheritance in a Playwright automation framework?
+
+Inheritance is a mechanism where a child class derives properties and methods from a parent class, enabling code reuse and hierarchical structure.Create a BasePage class containing common methods:
+
+class BasePage {
+  constructor(page){
+    this.page = page
+  }
+
+  async click(locator){
+    await this.page.locator(locator).click()
+  }
+}
+
+Then extend it:
+
+class LoginPage extends BasePage {
+  async login(user, pass){
+    await this.click("#login")
+  }
+}
+
+Benefits:
+
+Reusable common functionality
+
+Easier maintenance
+
+Reduced code duplication
+
+------------------------------------------------------------------------
+
+5.What is a constructor in a class?
+Why is it commonly used in Page Object Model classes?
+
+
+A constructor is a special method in a class that is automatically executed when an object of that class is created.
+
+Example
+class LoginPage {
+
+
+ constructor(page:Page){
+   this.page = page
+ }
+
+}
+Why constructors are used in POM
+
+They are used to:
+
+Initialize the Playwright page object
+
+Initialize locators
+
+Setup dependencies required for the page
+
+Example:
+
+constructor(page){
+ this.page = page
+ this.username = page.locator('#username')
+}
+
+Benefit:
+
+Each Page Object receives the same browser page instance.
+
+
+------------------------------------------------------------------------
+
+Q5. Difference between:
+type
+
+and
+
+interface in typescript
+
+A common interview question.
+
+### Simple Layman Explanation
+
+Think of **`type`** and **`interface`** as two different ways of creating a **blueprint** for an object.
+
+For example, if you want every employee to have a name and age:
+
+#### Using Interface
+
+```typescript
+interface Employee {
+  name: string;
+  age: number;
+}
+```
+
+#### Using Type
+
+```typescript
+type Employee = {
+  name: string;
+  age: number;
+};
+```
+
+For basic object definitions, **both work almost the same**.
+
+---
+
+```typescript
+interface Employee {
+  name: string;
+}
+
+interface Employee {
+  age: number;
+}
+```
+
+TypeScript automatically merges them:
+
+```typescript
+const emp: Employee = {
+  name: "Ravi",
+  age: 25
+};
+```
+
+This is called **Declaration Merging**.
+
+✅ Possible with Interface
+
+❌ Not possible with Type
+
+---
+
+### Type = Flexible Label
+
+A type is more like a label that can describe many things, not just objects.
+
+It can represent:
+
+#### Object
+
+```typescript
+type Employee = {
+  name: string;
+  age: number;
+};
+```
+
+#### String Union
+
+```typescript
+type PaymentMethod = "UPI" | "CreditCard" | "PayPal";
+```
+
+#### Number
+
+```typescript
+type Age = number;
+```
+
+#### Function
+
+```typescript
+type Greet = (name: string) => string;
+```
+
+So **type is more flexible**.
+
+---
+
+## Extending
+
+### Interface
+
+```typescript
+interface Person {
+  name: string;
+}
+
+interface Employee extends Person {
+  salary: number;
+}
+```
+
+### Type
+
+```typescript
+type Person = {
+  name: string;
+};
+
+type Employee = Person & {
+  salary: number;
+};
+```
+
+The `&` means combine both.
+
+---
+
+## Interview-Friendly Answer
+
+| Feature                       | Interface | Type               |
+| ----------------------------- | --------- | ------------------ |
+| Used for Objects              | ✅         | ✅                  |
+| Supports Declaration Merging  | ✅         | ❌                  |
+| Can represent Union Types     | ❌         | ✅                  |
+| Can represent Primitive Types | ❌         | ✅                  |
+| Can represent Functions       | ✅         | ✅                  |
+| Extending                     | `extends` | `&` (Intersection) |
+
+---
+
+## Easy Way to Remember
+
+👉 **Interface = Best for defining object structures and APIs.**
+
+👉 **Type = Best when you need unions, intersections, primitives, or more complex type combinations.**
+
+### One-line Interview Answer
+
+> "Both `interface` and `type` are used to define custom types in TypeScript. Interfaces are mainly used for object structures and support declaration merging, whereas types are more flexible because they can represent unions, primitives, tuples, and complex type combinations."
+
+------------------------------------------------------------------------
+
+6.In an automation framework, why would you make locators or methods private inside a Page Object class?
+
+Locators are usually made private to enforce encapsulation.
+
+Reasons:
+
+Prevent direct access from test files
+
+Ensure locators are used only through page methods
+
+Reduce accidental misuse
+
+Improve maintainability
+
+Example:
+
+class LoginPage {
+
+ private usernameField
+ private passwordField
+
+ async login(user, pass){
+   await this.usernameField.fill(user)
+ }
+}
+
+Tests should call:
+
+const login = new LoginPage() // creating an object for the class LoginPage() to call the methods insie the class
+loginPage.login()
+
+Not:
+
+page.locator('#username')
+
+------------------------------------------------------------------------
+7.What is the Page Object Model, and why is it considered a best practice in automation frameworks?
+
+The Page Object Model (POM) is a design pattern where each application page is represented as a class containing:
+
+Page locators
+
+Page actions
+
+Page methods
+
+Example:
+
+LoginPage.ts
+DashboardPage.ts
+ProfilePage.ts
+
+
+Why POM is best practice
+
+Improves test readability
+
+Reduces code duplication
+
+Improves maintainability
+
+Centralizes locators
+
+Example:
+
+If a locator changes:
+
+Update in LoginPage only
+
+------------------------------------------------------------------------
+
+8.If two pages share similar functionality such as:
+
+search()
+logout()
+navigation menu
+How would you reuse this logic using POM?
+
+Shared functionality can be extracted into a BasePage or component class.
+
+Example
+
+Create BasePage:
+
+class BasePage {
+
+ async search(text){
+ }
+
+ async logout(){
+ }
+
+}
+
+Other pages extend it:
+
+class DashboardPage extends BasePage {}
+class ProductsPage extends BasePage {}
+
+Another approach:
+
+Create component classes
+
+components/
+   navbar.ts
+   search.ts
+
+Then reuse across pages.
+
+Benefit:
+
+Avoid duplicate code.
+
+------------------------------------------------------------------------
+
+10.If multiple tests depend on the same test data, how would you avoid data conflicts in parallel execution?
+When tests run in parallel, using shared test data can cause conflicts.
+
+ Generate unique test data
+
+Example:
+
+username = user + timestamp
+date=Date.now()
+ravi+14052026
+
+ Use API to create fresh data
+
+Before each test:
+
+Create user via API
+Run UI test
+Delete user
+
+Use Faker Data
+
+------------------------------------------------------------------------
+
+11.There are 2 functions in playwright to enter a value in textbox, one is type and another one is fill. When to use what?
+
+fill() method
+What it does
+
+fill() directly sets the value of the input field. It clears the existing value and inserts the new value instantly.
+
+Example
+await page.locator('#username').fill('ravindran');
+Characteristics
+
+Clears existing text automatically
+
+Inserts the value instantly
+
+What it does
+
+type() simulates real user typing by sending characters one by one, triggering keyboard events like keydown, keypress, and keyup.
+
+Example
+await page.locator('#search').type('Playwright');
+
+You can even simulate typing delay:
+
+await page.locator('#search').type('Playwright', { delay: 100 });
+Characteristics
+
+Types character by character
+
+Triggers keyboard events
+
+Slower than fill()
+
+
+-----------------------------------------------------------------------------------------------------------------------
+Week5 
+------
+Q1. Window Handling (Popups & Tabs)
+
+The Question:
+"You click a button that opens a third-party payment gateway in a new tab. How do you capture that tab, and why is using Promise.all essential here instead of just awaiting the click first?"
+The Problem: When you await a click, the code execution pauses until the click action is complete. During that micro-second, the browser might have already opened the new tab. If your waitForEvent('page') starts after that, it misses the "open" event entirely, and your test hangs forever.
+The Solution: Promise.all creates a "listening" state and an "action" state simultaneously.
+
+-----------------------------------------------------------------------------------------------------------------------
+Q2. Dialog Handling Timing
+
+Q:
+Will this code correctly handle dialogs?
+
+A:
+No — the listener must be registered before the click:
+
+page.on('dialog', async dialog => {
+  console.log(dialog.message());
+  await dialog.accept('My Input Text');
+});
+await page.getByRole('button', { name: 'Confirm' }).click();
+
+-----------------------------------------------------------------------------------------------------------------------
+
+3. Verify File Download and Check Size
+
+Q:
+A report is downloaded. How do you verify the download succeeded and confirm the file size?
+
+A:
+
+import fs from 'fs';
+
+const [download] = await Promise.all([
+  page.waitForEvent('download'),
+  page.click('#download-report-btn'),
+]);
+
+const filePath = './downloads/' + download.suggestedFilename();
+await download.saveAs(filePath);
+
+expect(fs.existsSync(filePath)).toBe(true);
+const stats = fs.statSync(filePath);
+expect(stats.size).toBeGreaterThan(0);
+
+This confirms the file exists and isn’t empty.
+
+------------------------------------------------------------------------
+
+4. Hidden File Upload Input
+
+Q:
+How do you upload a file if the <input type="file"> is hidden via CSS?
+
+A:
+Playwright can set files directly on hidden inputs:
+
+await page.locator('input[type="file"]').setInputFiles('tests/data/file.pdf');
+
+Or use a file chooser if triggered by a button:
+
+const chooser = await page.waitForEvent('filechooser');
+await page.getByRole('button', { name: 'Upload' }).click();
+await chooser.setFiles('tests/data/file.pdf');
+
+------------------------------------------------------------------------
+
+
+5. Retry Logic for Downloads
+
+Q:
+Sometimes downloads fail due to load — how do you implement retry logic without hiding real errors?
+
+A:
+Wrap download logic in a retry loop with limited tries and explicit logging:
+
+async function downloadWithRetry(page, maxRetry = 3) {
+
+  for (let attempt = 1; attempt <= maxRetry; attempt++) {
+    try {
+      const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.click('#downloadbtn'),
+      ]);
+      await download.saveAs(`./downloads/${download.suggestedFilename()}`);
+      return true;
+    } catch (err) {
+      console.warn(`Attempt ${attempt} failed: ${err.message}`);
+      if (attempt === maxRetry) throw err;
+      await page.waitForTimeout(1000);
+    }
+  }
+}
+
+
+✅ Success Case
+
+return true;
+
+If download succeeds → exit function immediately
+No more retries needed
+
+❌ Error Handling + Logging
+
+catch (err) {
+  console.warn(`Attempt ${attempt} failed: ${err.message}`);
+Logs failure for each attempt
+Helps debugging flaky tests
+
+Example log:
+
+Attempt 1 failed: Timeout 30000ms exceeded
+🚫 Final Failure Condition
+
+if (attempt === maxRetry) throw err;
+
+If last attempt fails → throw error
+
+Test will fail properly (important for CI)
+
+------------------------------------------------------------------------
+
+6. Assert File Type Before Upload
+
+Q:
+How do you validate the file type before uploading?
+
+A:
+
+import path from 'path';
+
+const ext = path.extname(filePath);
+expect(ext).toBe('.pdf'); // or any expected type
+
+------------------------------------------------------------------------
+
+
+7. Assert File Size Before Upload
+
+Q:
+Before uploading, how do you check file size?
+
+A:
+
+import fs from 'fs';
+
+const stats = fs.statSync(filePath);
+expect(stats.size).toBeGreaterThan(0);
+
+
+------------------------------------------------------------------------
+8.You want smoke tests to run first with minimal retries, and full regression to run later with retries and videos. How would you split this using Playwright config?
+
+
+projects: [
+{
+  name: 'Smoke',
+  testMatch: /.*smoke.spec.ts/,
+  retries: 0,
+},
+{
+  name: 'Regression',
+  testIgnore: /.*smoke.spec.ts/,
+  retries: 2,
+  use: { video: 'on', trace: 'retain-on-failure' },
+},
+]
+Logical Separation via testMatch and testIgnore
+testMatch in Smoke: This ensures the Smoke project only looks for files ending in .smoke.spec.ts. It creates a focused, high-speed execution gate.
+testIgnore in Regression: In a full regression, you often want to run everything. However, if your Smoke tests are already running in a different CI job, you might use testIgnore to prevent redundancy,
+
+npx playwright test --project=Smoke: Runs only the fast, zero-retry tests.
+npx playwright test --project=Regression: Runs the heavy, resilient suite.
+
