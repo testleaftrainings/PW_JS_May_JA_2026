@@ -1,0 +1,502 @@
+
+
+A. Storage state.
+------------------
+
+Q1. Parallel Tests with storageState
+
+Q:
+Test A runs as Admin, Test B as a standard user. Both reuse storageState to skip login. How do you ensure isolation?
+
+A:
+Create separate browser contexts for each user state:
+
+const adminContext = await browser.newContext({ storageState: 'adminState.json' });
+const userContext = await browser.newContext({ storageState: 'userState.json' });
+
+Avoid sharing the same storage file between parallel tests to prevent race conditions.
+
+--------------------------------------------------------------------------------------------
+
+Q2. You saved storageState yesterday but tests fail today due to expired auth tokens. How would your framework detect this and automatically refresh state without human intervention?
+
+// Check if redirected to login page
+if (page.url().includes('/login')) {
+    await storeState(); // function name that gets called if the page is still in login page here the function takes care about the invoking of the storage state
+}
+
+Line diagram :
+--------------
+
+Start Test
+      │
+      ▼
+Load storageState.json
+      │
+      ▼
+Open Application
+      │
+      ▼
+Dashboard visible?
+      │
+ ┌────┴─────┐
+ │          │
+Yes        No
+ │          │
+ │     Login page shown
+ │          │
+ │          ▼
+ │   login-button visible?
+ │          │
+ │          ▼
+ │  loginAndSaveState()
+ │          │
+ │          ▼
+ │ Save new storageState.json
+ │          │
+ └──────────┘
+      │
+      ▼
+Continue Tests
+
+
+
+-----------------------------------------------------------------------------------------------
+
+Q3.How can API testing be integrated with browser-based testing in Playwright?
+
+ Example:
+
+  Use API to **create a user/session** → get auth token.
+  Use that token in browser context → skip login UI.
+
+  Explanation :
+
+  test('Login using API + continue in UI', async ({ request, page }) => {
+
+    // API Login
+    const response = await request.post('/login', {
+        data: {
+            username: 'admin',
+            password: 'test123'
+        }
+    })
+
+    const responseBody = await response.json()
+
+    const token = responseBody.token
+
+    // Inject token into browser
+    await page.addInitScript(token => {
+
+        localStorage.setItem('token', token)
+
+    }, token)
+
+    // Open application
+    await page.goto('https://example.com/dashboard')
+
+})
+
+
+Playwright secretly inserts:
+
+localStorage.setItem('token', token)
+
+into browser storage.
+
+So when website opens,
+website checks:
+
+"Do I already have login token?"
+
+Answer:
+
+YES
+
+So app skips login page.
+
+What Happens Internally?
+
+This code:
+
+await page.addInitScript(token => {
+
+    localStorage.setItem('token', token)
+
+}, token)
+
+means:
+
+Step 1
+
+Before page loads,
+
+Playwright injects JavaScript into browser.
+
+Step 2
+
+That JavaScript stores token in:
+
+Browser Local Storage
+
+like:
+
+token = abc123
+Step 3
+
+Then application loads.
+
+Application reads token from storage.
+
+Step 4
+
+Application thinks:
+
+User already authenticated
+
+addInitScript()
+
+runs BEFORE application JavaScript executes.
+
+That is why it is preferred for:
+
+authentication
+mocking
+overriding browser APIs
+setting storage values early
+-----
+
+Without addInitScript()
+
+Open Website
+↓
+Website checks token
+↓
+No token found
+↓
+Show Login Page
+
+----
+
+With addInitScript()
+
+Inject token first
+↓
+Open Website
+↓
+Website checks token
+↓
+Token found
+↓
+Open Dashboard directly
+
+*****************************************************
+
+B. Test annotation.
+--------------------
+
+B. Data parametrization.
+
+
+Q4."When would you choose CSV over JSON for test data? How do you iterate through a JSON array to generate dynamic test cases in Playwright?"
+
+Use for Data-Driven Testing (DDT) where you have hundreds of permutations of the same flat fields (e.g., a search field test with 500 different strings). It’s memory-efficient for the runner.
+
+Use CSV when:
+The test data is simple (rows and columns).
+You have only a few fields like username, password, and expected result.
+Non-technical people (QA, Business Analysts) need to edit the data easily in Excel.
+
+Example:
+
+Username	Password	Expected
+admin	admin123	Success
+user1	pass123	Failure
+
+CSV is easy to create and maintain.
+
+Use JSON when:
+The data is complex or nested.
+You have objects, arrays, or multiple levels of information.
+Different test cases require different sets of data.
+
+Example:
+
+[
+  {
+    "username": "admin",
+    "password": "admin123",
+    "roles": ["Admin", "Manager"]
+  },
+  {
+    "username": "user1",
+    "password": "pass123",
+    "roles": ["User"]
+  }
+]
+
+JSON is more flexible than CSV.
+
+Interview Answer
+
+"I use CSV when the data is simple and tabular because it's easy to edit in Excel. I use JSON when the test data is complex, contains nested objects or arrays, or different test cases need different fields."
+json:
+ex : testcase.json
+
+[
+ {
+   "username": "admin_user",
+   "role": "admin",
+   "details": {
+     "permissions": ["create_user", "delete_user", "edit_settings"],
+     "accessLevel": 10
+   }
+ },
+ {
+   "username": "guest_user",
+   "role": "guest",
+   "details": {
+     "viewOnly": true,
+     "expiryDays": 7
+   }
+ }
+]
+
+for(let i=0; i<=1; i++){
+testcase[i].details.permissions
+}
+
+testcase[0].details.permissions // admin_user
+testcase[1].details.expirtDays // admin_user
+
+
+
+Best for nested, hierarchical data or when specific keys vary per object.
+Iteration in Playwright
+
+------------------------------------------------------------------------
+
+Q5.Explain how you structure .env.qa, .env.staging, .env.prod, and how your Playwright config dynamically selects the correct values at runtime.
+
+
+import dotenv from 'dotenv';
+
+const env = process.env.ENV || 'qa' || 'prod';
+
+dotenv.config({ path: `.env.${env}` });
+
+export default defineConfig({
+  use: { baseURL: process.env.BASE_URL }
+});
+
+
+------------------------------------------------------------------------
+
+Q6.Your CI must run smoke tests on PRs and full regression on nightly builds. How will you configure Playwright test runner to support this?
+
+Use tags (e.g., @smoke) and grep.
+Command Line:
+Smoke (PR): npx playwright test --grep @smoke
+
+- name: Run Smoke Tests
+    if: github.event_name == 'pull_request'
+    run: npx playwright test --grep @smoke
+
+  RUN FULL REGRESSION ON SCHEDULE
+  - name: Run Full Regression
+    if: github.event_name == 'schedule'
+    run: npx playwright test
+
+
+------------------------------------------------------------------------
+
+Q7.“In the CSV file, some rows have extra optional fields (e.g. discount codes) that only apply if non-empty. How would you handle these optional fields in a robust Playwright parameterized test?
+
+When parsing the CSV, use the columns: true and relax_column_count: true options. This prevents the parser from throwing an error if Row 5 has 3 columns but Row 6 only has 2.
+typescript
+const records = parse(fs.readFileSync('data.csv'), {
+columns: true,
+skip_empty_lines: true, // extra spaces in the row can be handles using skip_empty_lines: true
+ relax_column_count: true // Don't crash if columns are missing
+});
+
+
+------------------------------------------------------------------------
+
+Q9.How do you conditionally skip a test only on the 'Production' environment using annotations?"
+
+The Answer: Use test.skip(). You combine it with your .env logic to ensure certain tests (like "Delete User") never run on Live.
+test('Delete User Account', async ({ page }) => {
+ // If the environment is 'prod', this test will be skipped immediately
+
+test.skip(process.env.ENV === 'prod', 'Data deletion is not allowed in Production'); 
+
+await page.goto('/settings');
+await page.click('#delete-account');
+
+});
+Use code with caution.
+
+
+------------------------------------------------------------------------
+
+Q10."What is the difference between test.describe.configure({ mode: 'serial' }) and test.describe.parallel()?"
+The Answer:
+mode: 'serial': Runs tests in the same file one after another. Crucially, if one test fails, all subsequent tests in that file are skipped. Use this for dependent flows (e.g., Test 1: Create User, Test 2: Edit User, Test 3: Delete User). [1, 2]
+parallel(): Forces Playwright to run tests within a single file across multiple workers simultaneously to save time. [3, 4]
+
+
+------------------------------------------------------------------------
+
+Q11.You have a very heavy test that takes 2 minutes, but your global timeout is 30 seconds. How do you handle this without changing the global config?"
+The Answer: Use test.slow().
+This annotation triples the default timeout for that specific test. If your global timeout is 30s, test.slow() makes it 90s.
+ALso use test.setTimeout(60000) customize the timeout of a specific test
+------------------------------------------------------------------------
+
+Q12.You want smoke tests to run first with minimal retries, and full regression to run later with retries and videos. How would you split this using Playwright config?
+
+
+projects: [
+{
+  name: 'Smoke',
+  testMatch: /.*smoke.spec.ts/, // here * means all the file that includes the word called "smoke", all the critical functionality exampke login
+  retries: 0,
+},
+{
+  name: 'Regression',
+  testIgnore: /.*smoke.spec.ts/,
+  retries: 2,
+  use: { video: 'on', trace: 'retain-on-failure' },
+},
+]
+Logical Separation via testMatch and testIgnore
+testMatch in Smoke: This ensures the Smoke project only looks for files ending in .smoke.spec.ts. It creates a focused, high-speed execution gate.
+testIgnore in Regression: In a full regression, you often want to run everything. However, if your Smoke tests are already running in a different CI job, you might use testIgnore to prevent redundancy,
+
+npx playwright test --project=Smoke // Runs only the fast, zero-retry tests.
+npx playwright test --project=Regression // Runs the heavy, resilient suite.
+
+
+-------------------------------------------
+
+C. API fundamentals
+
+*****************************************************
+
+Interview Based Questions :
+-------------------------
+
+1. Architectute Type?
+REST API's follow's Client server archirtecture.
+Micro services.
+
+2. HTTP Request Methods :(CRUD operations--> Create Update Retrieve, Delete)
+POST, PUT, PATCH, GET, DELETE
+
+3. Difference between URI and URL?
+
+A URI (Uniform Resource Identifier) is a string that uniquely identifies a resource, while a URL (Uniform Resource Locator) is a type of URI that specifies the resource’s location (address) and how to access it.
+
+4. Stateless/ Statefull?
+
+A stateless system means:
+Each request is independent — the server does not remember anything about previous requests.
+
+A stateful system means:
+The server remembers information (state) between requests.
+
+REST API follow stateless, which means request contains all the information needed to process your activity. 
+
+5.Difference between Authentication and Authorization?
+Authentication verifies identity , while authorization checks access rights.
+
+| Concept           | **Authentication**                                   | **Authorization**                                                        |
+| ----------------- | ---------------------------------------------------- | ------------------------------------------------------------------------ |
+| **Meaning**       | It verifies **who you are**                          | It defines **what you can do**                                           |
+| **Purpose**       | Confirms the **identity** of a user                  | Grants or restricts **access/permissions**                               |
+| **Happens When?** | Always happens **before** authorization              | Happens **after** authentication                                         |
+| **Example**       | You log in with your username and password           | Once logged in, you can access only your own profile, not admin settings |
+| **Analogy**       | Showing your ID card at the gate                     | Being allowed to enter only certain rooms based on your role             |
+
+
+6. Various Response Code?
+Response Codes liek 201 Created, 200 (OK), 401(Unauthorized), 404(NOt found).
+
+200 series --> success of what ecer api action that you implement (eg POST, GET, PUT, PATCH, DELETE )
+400 series --> Client side error. (ex username, password, endpoint , request body format)
+500 series --> Server side error. (ex server down)
+
+7. Request Headers ?
+
+Headers are key-value pairs sent along with the request that describe how the client and server should communicate.
+
+Example : 
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer <token>
+
+8. Schema Validation and response validation?
+
+Schema Validation :
+
+Schema validation checks if the data structure (keys + value types) in the response matches the expected format.
+
+Example:
+
+{
+"id":101,
+"name":"Ravi",
+"isActive":true
+}
+
+{
+"id":"101",           //id is a string not a number
+"name":"Ravi",
+"isActive":true
+}
+
+--------------
+
+Response validation:
+Response validation checks the actual values returned, not just the data type.
+
+Example:
+
+{
+"id":101,
+"name":"Ravi",
+"isActive":true
+}
+
+{
+"id":"101",           //wrong value reponse validation
+"name":"Ravi",
+"isActive":false
+}
+
+---
+
+9. Difference between REST API and REST ASSURED?
+
+REST API is the actual web services, while REST ASSURED is a Java Library used to test REST API's.
+
+---
+10. Path parameter and query parameter?
+
+| Feature             | **Path Parameter**                                      | **Query Parameter**                       |
+| ------------------- | ------------------------------------------------------- | ----------------------------------------- |
+| **Purpose**         | Identifies a **specific resource**                      | Filters or customizes the **result**      |
+| **Location in URL** | Part of the **URL path**                                | Comes **after `?`** in the URL            |
+| **Syntax Example**  | `/users/101`                                            | `/users?id=101`                           |
+| **UsempId**           | To point to one resource (like a specific user or lead) | To send filters, search terms, or options |
+| **Visibility**      | Mandatory part of the endpoint                          | Optional part of the endpoint             |
+| **Separator**       | `/` slash                                               | `?` for first, `&` for multiple           |
+
+
+
+
+
+
+

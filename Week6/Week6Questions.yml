@@ -1,0 +1,29 @@
+
+
+A. Storage state.
+------------------
+
+Q1. Parallel Tests with storageState
+Q:
+Test A runs as Admin, Test B as a standard user. Both reuse storageState to skip login. How do you ensure isolation?
+
+Q2. You saved storageState yesterday but tests fail today due to expired auth tokens.
+How would your framework detect this and automatically refresh state without human intervention?
+
+Q3.How can API testing be integrated with browser-based testing in Playwright? // Discuss this next JA Session 
+
+Q4."When would you choose CSV over JSON for test data? How do you iterate through a JSON array to generate dynamic test cases in Playwright?"
+
+Q5.Explain how you structure .env.qa, .env.staging, .env.prod, and how your Playwright config dynamically selects the correct values at runtime.
+
+Q6.Your CI must run smoke tests on PRs and full regression on nightly builds. How will you configure Playwright test runner to support this?
+
+Q7.“In the CSV file, some rows have extra optional fields (e.g. discount codes) that only apply if non-empty. How would you handle these optional fields in a robust Playwright parameterized test?
+
+Q9.How do you conditionally skip a test only on the 'Production' environment using annotations?"
+
+Q10."What is the difference between test.describe.configure({ mode: 'serial' }) and test.describe.parallel()?"
+
+Q11.You have a very heavy test that takes 2 minutes, but your global timeout is 30 seconds. How do you handle this without changing the global config?"
+
+Q12.You want smoke tests to run first with minimal retries, and full regression to run later with retries and videos. How would you split this using Playwright config?
